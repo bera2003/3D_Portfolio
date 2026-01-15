@@ -1,59 +1,89 @@
 import { useRef } from "react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { ScrollTrigger } from "gsap/all";
 
-import { counterItems } from "../constants";
-
+// Register GSAP plugin
 gsap.registerPlugin(ScrollTrigger);
 
+const counterItems = [
+  {
+    value: 3,
+    suffix: "rd",
+    label: "Year B.Tech Student",
+  },
+  {
+    value: 2,
+    suffix: "+",
+    label: "Completed Projects",
+  },
+  {
+    value: 1,
+    suffix: "",
+    label: "Internship Completed",
+  },
+  {
+    value: 6,
+    suffix: "+",
+    label: "Core Technologies Learned",
+  },
+];
+
 const AnimatedCounter = () => {
-  const counterRef = useRef(null);
   const countersRef = useRef([]);
 
   useGSAP(() => {
     countersRef.current.forEach((counter, index) => {
-      const numberElement = counter.querySelector(".counter-number");
-      const item = counterItems[index];
+      if (!counter) return;
 
-      // Set initial value to 0
-      gsap.set(numberElement, { innerText: "0" });
+      const numberEl = counter.querySelector(".counter-number");
+      const { value, suffix } = counterItems[index];
 
-      // Create the counting animation
-      gsap.to(numberElement, {
-        innerText: item.value,
-        duration: 2.5,
-        ease: "power2.out",
-        snap: { innerText: 1 }, // Ensures whole numbers
-        scrollTrigger: {
-          trigger: "#counter",
-          start: "top center",
-        },
-        // Add the suffix after counting is complete
-        onComplete: () => {
-          numberElement.textContent = `${item.value}${item.suffix}`;
-        },
-      });
-    }, counterRef);
+      gsap.fromTo(
+        numberEl,
+        { innerText: 0 },
+        {
+          innerText: value,
+          duration: 1.8,
+          ease: "power2.out",
+          snap: { innerText: 1 },
+          scrollTrigger: {
+            trigger: counter,
+            start: "top 80%",
+            once: true,
+          },
+          onUpdate: () => {
+            numberEl.textContent = `${Math.floor(
+              numberEl.innerText
+            )}${suffix}`;
+          },
+        }
+      );
+    });
   }, []);
 
   return (
-    <div id="counter" ref={counterRef} className="padding-x-lg xl:mt-0 mt-32">
-      <div className="mx-auto grid-4-cols">
+    <section
+      id="counter"
+      className="padding-x-lg mt-8"
+    >
+      <div className="mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {counterItems.map((item, index) => (
           <div
             key={index}
-            ref={(el) => el && (countersRef.current[index] = el)}
-            className="bg-zinc-900 rounded-lg p-10 flex flex-col justify-center"
+            ref={(el) => (countersRef.current[index] = el)}
+            className="bg-zinc-900 rounded-xl p-10 flex flex-col justify-center hover:scale-[1.02] transition-transform"
           >
-            <div className="counter-number text-white-50 text-5xl font-bold mb-2">
-              0 {item.suffix}
+            <div className="counter-number text-white text-5xl font-bold mb-3">
+              0{item.suffix}
             </div>
-            <div className="text-white-50 text-lg">{item.label}</div>
+            <div className="text-white-50 text-lg">
+              {item.label}
+            </div>
           </div>
         ))}
       </div>
-    </div>
+    </section>
   );
 };
 
